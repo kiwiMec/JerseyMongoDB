@@ -11,6 +11,6 @@ JerseyMongoDB
 
   You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-An example of how Jersey and MongoDB can be used to make a ReSTful web service for servlet v3 containers.  Created using Netbeans 8.0.1 and tested on Tomcat 8.1 with MongoDB 2.6.4.
+An example of how Jersey and MongoDB can be used to make a ReSTful web service for servlet v3 containers.  Created using Netbeans 8.0.1 and tested on Tomcat 8.0.12 with MongoDB 2.6.4.
 
 See JerseyMongoDB/src/main/resources/README for further details. 

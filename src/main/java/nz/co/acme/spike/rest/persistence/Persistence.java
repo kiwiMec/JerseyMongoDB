@@ -1,5 +1,5 @@
 /**
- * RestServiceTemplate : A proof of concept ReST / MongoDB service for 
+ * JerseyMongoDB : A proof of concept ReST / MongoDB service for 
  * educational purposes only.
  *  Copyright (C) 2014  Michael Chester
  *
