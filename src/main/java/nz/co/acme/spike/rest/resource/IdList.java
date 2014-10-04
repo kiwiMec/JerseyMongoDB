@@ -98,7 +98,7 @@ public class IdList {
     /**
      * Create a JSON string representation of this object.
      * 
-     * @return String in JSON format
+     * @return String in JSON format or null if an exception is caught.
      */
     @Override
     public String toString() {
@@ -108,7 +108,7 @@ public class IdList {
         } catch (JsonProcessingException ex) {
             Logger.getLogger(IdList.class.getName())
                     .log(Level.SEVERE, null, ex);
-            return "{\"rel\":[]}";
+            return null;
         }
     }
 

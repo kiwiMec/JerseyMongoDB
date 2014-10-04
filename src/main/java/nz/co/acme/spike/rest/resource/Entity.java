@@ -130,7 +130,7 @@ public class Entity {
     /**
      * Create a JSON string representation of this object.
      * 
-     * @return String in JSON format.
+     * @return String in JSON format or null if an exception is caught.
      */
     @Override
     public String toString() {
@@ -140,7 +140,7 @@ public class Entity {
         } catch (JsonProcessingException ex) {
             Logger.getLogger(Entity.class.getName())
                     .log(Level.SEVERE, null, ex);
-            return "{}";
+            return null;
         }
     }
 

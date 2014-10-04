@@ -41,7 +41,7 @@ import nz.co.acme.spike.rest.persistence.Access;
  * 'Access' class must only be instantiated following this injection.  This 
  * ordering is enforced by the servlet context startup order.
  * 
- * @author michael
+ * @author Michael Chester
  */
 @WebListener
 public class MongoDb implements ServletContextListener {
@@ -59,7 +59,7 @@ public class MongoDb implements ServletContextListener {
      * 
      * @param servletContextEvent
      */
-        @Override
+    @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {

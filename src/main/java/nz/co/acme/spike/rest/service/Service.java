@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import nz.co.acme.spike.rest.events.Events;
 import nz.co.acme.spike.rest.persistence.Persistence;
 import nz.co.acme.spike.rest.resource.Entity;
 import nz.co.acme.spike.rest.resource.IdList;
@@ -33,7 +34,8 @@ import nz.co.acme.spike.rest.resource.IdList;
  * 
  * This class implements the resource methods for the ReST service.  It is 
  * implemented as a per call servlet JAX-RS instance.  All JAX-RS annotations
- * are contained in the implemented interface.
+ * are contained in the implemented interface.  Each method calls the 
+ * appropriate event methods to handle associated business logic.
  *
  * @author Michael Chester
  */
@@ -42,6 +44,7 @@ public class Service implements Api {
     private static final Logger logger = 
             Logger.getLogger(Service.class.getName());
 
+    private final Events events;
     private final Persistence persistence;
 
     /**
@@ -49,6 +52,7 @@ public class Service implements Api {
      */
     public Service() {
         logger.info("New Service created.");
+        events = new Events();
         persistence = new Persistence("Service", "Resource");
     }
 
@@ -61,7 +65,8 @@ public class Service implements Api {
     @Override
     public IdList listIds() {
         logger.info("Reading ID list.");
-        return persistence.readIds();
+        events.preListIds();
+        return events.postListIds(persistence.readIds());
     }
 
     /**
@@ -75,12 +80,13 @@ public class Service implements Api {
     public Entity create(Entity entity) {
         entity.setId(UUID.randomUUID().toString());
         logger.log(Level.INFO, "Creating new resource {0}.", entity);
-        Entity createdEntity = persistence.create(entity);
-        if (entity == null) {
+        Entity newEntity = events.preCreate(entity);
+        Entity createdEntity = persistence.create(newEntity);
+        if (createdEntity == null) {
             throw new WebApplicationException(
                     Response.Status.INTERNAL_SERVER_ERROR);
         }
-        return createdEntity;
+        return events.postCreate(newEntity, createdEntity);
     }
 
     /**
@@ -92,12 +98,13 @@ public class Service implements Api {
      */
     @Override
     public Entity read(String id) {
-        logger.log(Level.INFO, "Retrieving resource with id {0}.", id);
-        Entity entity = persistence.read(id);
+        String newId = events.preRead(id);
+        logger.log(Level.INFO, "Retrieving resource with id {0}.", newId);
+        Entity entity = persistence.read(newId);
         if (entity == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        return entity;
+        return events.postRead(id, entity);
     }
 
     /**
@@ -110,13 +117,14 @@ public class Service implements Api {
      */
     @Override
     public Entity update(String id, Entity entity) {
+        events.preUpdate(id, entity);
         if (entity.getId().compareTo(id) != 0) {
             logger.info("ID provided does not match ID in entity.");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
         logger.log(Level.INFO, "Updating resource {0} with {1}.", 
                 new Object[]{id, entity});
-        return persistence.update(id, entity);
+        return events.postUpdate(id, entity, persistence.update(id, entity));
     }
 
     /**
@@ -128,9 +136,11 @@ public class Service implements Api {
     @Override
     public void delete(String id) {
         logger.log(Level.INFO, "Deleting resource with id {0}.", id);
-        if (persistence.delete(id) != 1) {
+        String newId = events.preDelete(id);
+        if (persistence.delete(newId) != 1) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
+        events.postDelete(newId);
     }
 
 }

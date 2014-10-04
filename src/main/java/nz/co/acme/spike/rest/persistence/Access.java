@@ -32,7 +32,7 @@ import org.mongojack.JacksonDBCollection;
  * Primarily this class is simply to separate the logic required to set up the
  * Jackson connection from the document persistence functionality.
  *
- * @author michael
+ * @author Michael Chester
  */
 public class Access {
 
