@@ -1,8 +1,5 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
 /**
- * ${artifactId} : A proof of concept ReST / MongoDB service for 
+ * basic : A proof of concept ReST / MongoDB service for 
  * educational purposes only.
  *  Copyright (C) 2014  Michael Chester
  *
@@ -20,17 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ${package}.service;
+package it.pkg.service;
 
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import ${package}.events.Events;
-import ${package}.persistence.Persistence;
-import ${package}.resource.Entity;
-import ${package}.resource.IdList;
+import it.pkg.events.Events;
+import it.pkg.persistence.Persistence;
+import it.pkg.resource.Entity;
+import it.pkg.resource.IdList;
 
 /**
  * ReST service implementation.
@@ -56,7 +53,7 @@ public class Service implements Api {
     public Service() {
         logger.info("New Service created.");
         events = new Events();
-        persistence = new Persistence("${artifactId}", "Resource");
+        persistence = new Persistence("basic", "Resource");
     }
 
     /**
