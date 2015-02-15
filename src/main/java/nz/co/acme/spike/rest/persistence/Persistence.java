@@ -1,27 +1,26 @@
 /**
- * JerseyMongoDB : A proof of concept ReST / MongoDB service for 
- * educational purposes only.
- *  Copyright (C) 2014  Michael Chester
+ * JerseyMongoDB : A proof of concept ReST / MongoDB service for educational
+ * purposes only. Copyright (C) 2014 Michael Chester
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nz.co.acme.spike.rest.persistence;
 
-import nz.co.acme.spike.rest.resource.IdList;
 import nz.co.acme.spike.rest.resource.Entity;
 import com.mongodb.BasicDBObject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.mongojack.DBCursor;
@@ -30,10 +29,10 @@ import org.mongojack.WriteResult;
 
 /**
  * Data persistence services class.
- * 
+ *
  * Contains a number of persistence methods for dealing with the MongoDB back
  * end.
- * 
+ *
  * @author Michael Chester
  */
 public class Persistence {
@@ -53,7 +52,7 @@ public class Persistence {
      */
     public Persistence(String database, String collection) {
         logger.log(Level.INFO, "New Persistence object created for the "
-                + "collection {0} in the database {1}.", 
+                + "collection {0} in the database {1}.",
                 new Object[]{collection, database});
         this.database = database;
         this.collection = collection;
@@ -61,13 +60,13 @@ public class Persistence {
 
     /**
      * Creates a new resource from the given entity.
-     * 
-     * This will persist the given entity to the document store.  
-     * 
+     *
+     * This will persist the given entity to the document store.
+     *
      * Note that no checking is done for duplicates so it will happily add the
-     * same entity twice.  Uniqueness is assumed to be enforced by the
-     * generation of a new UUID by the caller.  A uniqueness constraint could
-     * also be placed on the id field of the collection.
+     * same entity twice. Uniqueness is assumed to be enforced by the generation
+     * of a new UUID by the caller. A uniqueness constraint could also be placed
+     * on the id field of the collection.
      *
      * @param entity
      * @return a copy of the created entity, or null if an exception took place
@@ -87,34 +86,34 @@ public class Persistence {
     }
 
     /**
-     * Get a list of id's as contained in the id fields of the document 
+     * Get a list of id's as contained in the id fields of the document
      * collection.
      *
-     * This allows inspection of the available documents by id.  At the moment
-     * it is not paginated.  Because the documents are not indexed sequentially
-     * but by unique id it would be difficult to accurately paginate from this
+     * This allows inspection of the available documents by id. At the moment it
+     * is not paginated. Because the documents are not indexed sequentially but
+     * by unique id it would be difficult to accurately paginate from this
      * level.
-     * 
+     *
      * @return an IdList containing all id fields in the collection.
      */
-    public IdList readIds() {
+    public List<String> readIds() {
         Access access = new Access(database, collection);
         BasicDBObject query = new BasicDBObject();
         BasicDBObject field = new BasicDBObject();
         field.put("id", 1);
         DBCursor dbCursor = access.getJacksonDBCollection().find(query, field);
-        IdList idList = new IdList();
+        List<String> list = new ArrayList<>();
         while (dbCursor.hasNext()) {
-            idList.addId(((Entity) dbCursor.next()).getId());
+            list.add(((Entity) dbCursor.next()).getId());
         }
-        logger.log(Level.INFO, "Read resource ID list {0}.", idList);
-        return idList;
+        logger.log(Level.INFO, "Read resource ID list {0}.", list);
+        return list;
     }
 
     /**
      * Read an Entity from persistence and return it to the caller.
-     * 
-     * Returns the requested entity if it exists and is recovered.  If an issue
+     *
+     * Returns the requested entity if it exists and is recovered. If an issue
      * prevents the entity from being recovered and returned then the event is
      * logged and null is returned.
      *
@@ -136,13 +135,13 @@ public class Persistence {
 
     /**
      * Update a persisted entity with the supplied replacement.
-     * 
+     *
      * Assumes that the id field is unique either by constraint or application
-     * management.  Looks up the entity persisted under the given id and 
+     * management. Looks up the entity persisted under the given id and
      * effectively replaces it with the new on provided in the parameter.
-     * 
+     *
      * At this level we do not enforce the id provided to be equivalent to that
-     * in the entity.  This allows for total update of a persisted entity.  If
+     * in the entity. This allows for total update of a persisted entity. If
      * this activity should not update the id then the calling thread will need
      * to ensure that the id's are the same.
      *
@@ -150,11 +149,17 @@ public class Persistence {
      * @param entity
      * @return a copy of the updated entity, or null otherwise
      */
-    public Entity update(String id, Entity entity) {
+    public Entity update(String id, String created, String lastUpdated, 
+            Entity entity) {
         Access access = new Access(database, collection);
         WriteResult<Entity, String> writeResult
                 = access.getJacksonDBCollection()
-                .update(DBQuery.is("id", id), entity);
+                .update(DBQuery
+                        .is("id", id)
+                        .is("created", created)
+                        .is("updated", lastUpdated)
+                        , 
+                        entity);
         if (writeResult.getN() > 0) {
             Entity updated = read(id);
             logger.log(Level.INFO, "Updated resource {0}.", updated);
