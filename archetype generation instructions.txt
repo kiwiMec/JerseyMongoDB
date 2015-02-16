@@ -1,0 +1,43 @@
+
+# clean out the target space so that we can see what gets generated
+mvn clean
+
+# generate the archetype from the project
+mvn archetype:create-from-project
+
+# move the archetype to its root location
+mv target/generated-sources/archetype .
+
+# change the current working directory to work with the archetype
+cd archetype
+
+# clean out the archetype
+mvn clean
+
+# update the context file 
+# src/main/resources/archetype-resources/src/main/webapp/META-INF/context.xml 
+# to contain 
+# <Context path="/${artifactId}"/> 
+# instead of 
+# <Context path="/resource"/>
+
+# update the file
+# src/main/resources/META-INF/maven/archetype-metadata.xml
+# as needed
+
+# update the file
+# src/main/resources/archetype-resources/pom.xml
+# to contain
+# <name>${artifactId}</name>
+# instead of
+# <name>JerseyMongoDB</name>
+
+# Update the file
+# src/main/resources/archetype-resources/src/main/java/rest/service/Service.java
+# to contain
+# persistence = new Persistence("${artifactId}", "Resource");
+# instead of
+# persistence = new Persistence("...", "Resource");
+
+# generate and install the new archetype locally
+mvn install
